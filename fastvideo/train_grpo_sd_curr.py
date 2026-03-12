@@ -137,7 +137,7 @@ def main(_):
     # load scheduler, tokenizer and models.
     pipeline = StableDiffusionPipeline.from_pretrained(
         #config.pretrained.model, revision=config.pretrained.revision
-        "/mnt/sda/runhaofu/DanceGRPO/data/stable-diffusion-v1-5/snapshots/451f4fe16113bff5a5d2269ed5ad43b0592e9a14"
+        "./data/stable-diffusion-v1-5"
     )
     # freeze parameters of models to save more memory
     pipeline.vae.requires_grad_(False)
@@ -352,7 +352,7 @@ def main(_):
     assert config.sample.batch_size % config.train.batch_size == 0
     assert samples_per_epoch % total_train_batch_size == 0
 
-    dataset = SceneDataset('/mnt/sda/runhaofu/SSC/assets/prompts_90_20260310_204125.json')
+    dataset = SceneDataset('./assets/prompts_90_20260310_204125.json')
     
     
     sampler = CurrDistributedSampler(

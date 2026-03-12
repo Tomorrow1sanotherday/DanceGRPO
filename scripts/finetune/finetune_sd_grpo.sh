@@ -14,5 +14,5 @@ export WANDB_MODE=online
 
 # mkdir images_same
 
-torchrun --nproc_per_node=3 --master_port 19001 \
+torchrun --nproc_per_node=1 --master_port 19001 \
 fastvideo/train_grpo_sd_curr.py --config fastvideo/config_sd/dgx.py:hps
