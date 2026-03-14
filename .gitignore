@@ -168,3 +168,4 @@ reward_model/
 temp_images/
 logs/
 checkpoints/
+!assets/prompts_12000.json
