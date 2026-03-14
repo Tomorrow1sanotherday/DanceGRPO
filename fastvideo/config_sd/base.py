@@ -109,6 +109,9 @@ def get_config():
     # Gaussian progression speed (larger = faster progression to hard samples)
     curriculum.beta = 1.0
 
+    ###### Dataset ######
+    config.dataset_path = "./assets/prompts_90_20260310_204125.json"
+
     ###### Prompt Function ######
     # prompt function to use. see `prompts.py` for available prompt functions.
     config.prompt_fn = "imagenet_animals"

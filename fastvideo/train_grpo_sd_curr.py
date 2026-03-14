@@ -283,7 +283,7 @@ def main(_):
   
   
     from models.reward import FineVQAReward
-    reward_model = FineVQAReward(model=config.reward_model_name, log_file=f'./logs/scaling/log_{config.run_name}.jsonl', use_fine_grained=True, use_calibration=False)
+    reward_model = FineVQAReward(model=config.reward_model_name, log_file=f'./logs/log_{config.run_name}.jsonl', use_fine_grained=True, use_calibration=False)
     # llava-v1.6-13b
     # clip-flant5-xxl
     # instructblip-flant5-xxl
@@ -351,7 +351,7 @@ def main(_):
     assert config.sample.batch_size % config.train.batch_size == 0
     assert samples_per_epoch % total_train_batch_size == 0
 
-    dataset = SceneDataset('./assets/prompts_90_20260310_204125.json')
+    dataset = SceneDataset(config.dataset_path)
     
     
     sampler = CurrDistributedSampler(

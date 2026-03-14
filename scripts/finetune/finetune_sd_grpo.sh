@@ -18,6 +18,9 @@ SD_MODEL_PATH="./data/stable-diffusion-v1-5"
 REWARD_MODEL_NAME="llava-v1.6-13b"
 TEMP_IMAGE_DIR="./temp_images"
 
+# Dataset settings
+DATASET_PATH="./assets/prompts_90_20260310_204125.json"
+
 # Checkpoint settings
 CHECKPOINT_DIR="./checkpoints"
 SAVE_FREQ=340
@@ -39,4 +42,5 @@ fastvideo/train_grpo_sd_curr.py \
     --config.curriculum.strategy="${CURRICULUM_STRATEGY}" \
     --config.curriculum.total_steps="${CURRICULUM_TOTAL_STEPS}" \
     --config.curriculum.alpha="${CURRICULUM_ALPHA}" \
-    --config.curriculum.beta="${CURRICULUM_BETA}"
+    --config.curriculum.beta="${CURRICULUM_BETA}" \
+    --config.dataset_path="${DATASET_PATH}"
