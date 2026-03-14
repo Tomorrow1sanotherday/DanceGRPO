@@ -19,7 +19,7 @@ REWARD_MODEL_NAME="llava-v1.6-13b"
 TEMP_IMAGE_DIR="./temp_images"
 
 # Dataset settings
-DATASET_PATH="./assets/prompts_90_20260310_204125.json"
+DATASET_PATH="./assets/prompts_12000.json"
 
 # Checkpoint settings
 CHECKPOINT_DIR="./checkpoints"
