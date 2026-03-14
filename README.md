@@ -100,6 +100,7 @@ mkdir -p checkpoints
 
 - 设置 W&B 环境变量（`WANDB_DISABLED=true` 等）  
 - 设置 SD 模型路径、奖励模型名称、临时图片目录、checkpoint 保存目录  
+- 设置训练数据集路径：`DATASET_PATH`（指向 prompt JSON 文件，如 `./assets/prompts_12000.json`）  
 - 设置 curriculum 采样策略：
   - `CURRICULUM_STRATEGY="timestep"`（可选 `"balance"`, `"cosine"`, `"gaussian"` 等）
   - `CURRICULUM_TOTAL_STEPS`、`CURRICULUM_ALPHA`、`CURRICULUM_BETA` 控制曲线形状  
@@ -117,7 +118,8 @@ torchrun --nproc_per_node=8 --master_port 19001 \
   --config.curriculum.strategy="${CURRICULUM_STRATEGY}" \
   --config.curriculum.total_steps="${CURRICULUM_TOTAL_STEPS}" \
   --config.curriculum.alpha="${CURRICULUM_ALPHA}" \
-  --config.curriculum.beta="${CURRICULUM_BETA}"
+  --config.curriculum.beta="${CURRICULUM_BETA}" \
+  --config.dataset_path="${DATASET_PATH}"
 ```
 
 - `--nproc_per_node=8` 表示使用 8 卡，如果你机器 GPU 数量不同，可以改成对应的卡数。  
@@ -160,6 +162,7 @@ bash finetune_sd_grpo.sh
 
 - **基础模型路径**：`SD_MODEL_PATH`  
 - **奖励模型名称**：`REWARD_MODEL_NAME`  
+- **数据集路径**：`DATASET_PATH`（prompt JSON 文件路径，如 `./assets/prompts_12000.json`）  
 - **Checkpoint 保存间隔**：`SAVE_FREQ`  
 - **Curriculum 策略与参数**：`CURRICULUM_STRATEGY`、`CURRICULUM_TOTAL_STEPS`、`CURRICULUM_ALPHA`、`CURRICULUM_BETA`  
 - **GPU 数量**：`torchrun --nproc_per_node=...`  
