@@ -168,7 +168,33 @@ bash finetune_sd_grpo.sh
 
 ---
 
-## 7. 快速总结
+## 7. 使用细粒度 VQAScore 的注意事项
+
+如果使用细粒度的 `vqa_score` 作为奖励信号，需要修改 `t2v_metrics` 包中 LLaVA 1.6 模型的默认问题模板，否则评分不够精准。
+
+找到安装环境中的文件：
+
+```
+<your_env>/lib/python3.10/site-packages/t2v_metrics/models/vqascore_models/llava16_model.py
+```
+
+将第 11 行的：
+
+```python
+default_question_template = 'Does this figure show "{}"? Please answer yes or no.'
+```
+
+改为：
+
+```python
+default_question_template = '{} Answer only "yes" or "no", one word only.'
+```
+
+> **原因**：默认模板是粗粒度的二分类提问（"Does this figure show ..."），对复杂场景描述的区分度不够。改为直接将场景描述作为问题、并限制只回答 yes/no 一个词，可以获得更细粒度、更准确的 VQAScore。
+
+---
+
+## 8. 快速总结
 
 1. 安装并使用 `uv` 创建 **Python 3.10** 环境 `dancegrpo`，激活；  
 2. `cd /root/autodl-tmp/DanceGRPO`；  
