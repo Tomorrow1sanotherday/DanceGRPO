@@ -78,6 +78,7 @@ sudo apt install ffmpeg
 - `SD_MODEL_PATH="./data/stable-diffusion-v1-5"`  
 - `REWARD_MODEL_NAME="llava-v1.6-13b"`  
 - `TEMP_IMAGE_DIR="./temp_images"`  
+- `DATASET_PATH="./assets/prompts_12000.json"`  
 - `CHECKPOINT_DIR="./checkpoints"`  
 
 你需要根据这些变量准备好：
