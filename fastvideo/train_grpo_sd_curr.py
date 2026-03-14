@@ -136,8 +136,7 @@ def main(_):
 
     # load scheduler, tokenizer and models.
     pipeline = StableDiffusionPipeline.from_pretrained(
-        #config.pretrained.model, revision=config.pretrained.revision
-        "./data/stable-diffusion-v1-5"
+        config.pretrained.model, revision=config.pretrained.revision
     )
     # freeze parameters of models to save more memory
     pipeline.vae.requires_grad_(False)
@@ -284,7 +283,7 @@ def main(_):
   
   
     from models.reward import FineVQAReward
-    reward_model = FineVQAReward(model='llava-v1.5-7b', log_file=f'./logs/scaling/log_{config.run_name}.jsonl', use_fine_grained=True, use_calibration=False)
+    reward_model = FineVQAReward(model=config.reward_model_name, log_file=f'./logs/scaling/log_{config.run_name}.jsonl', use_fine_grained=True, use_calibration=False)
     # llava-v1.6-13b
     # clip-flant5-xxl
     # instructblip-flant5-xxl
@@ -359,12 +358,12 @@ def main(_):
         dataset,
         num_replicas=torch.distributed.get_world_size(),
         rank=torch.distributed.get_rank(),
-        seed = 123543,
-        strategy="balance", # "timestep", "balance", "cosine", "gaussian"
-        total_steps=1000,
-        alpha=1.0,
-        beta=1.0,
-    )   
+        seed=123543,
+        strategy=config.curriculum.strategy,
+        total_steps=config.curriculum.total_steps,
+        alpha=config.curriculum.alpha,
+        beta=config.curriculum.beta,
+    )
     
     loader = DataLoader(
         dataset,
@@ -454,8 +453,9 @@ def main(_):
                     (image.to(torch.float32).cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
                 )
                 pil = pil.resize((512, 512))
-                os.makedirs(f"/mnt/tidalfs-bdsz01/dataset/llm_dataset/shijian/t2i_scaling/temp_images/{config.run_name}", exist_ok=True)
-                image_path = os.path.join(f"/mnt/tidalfs-bdsz01/dataset/llm_dataset/shijian/t2i_scaling/temp_images/{config.run_name}", f"image-{i}-{j}-rank-{dist.get_rank()}.jpg")
+                temp_dir = os.path.join(config.temp_image_dir, config.run_name)
+                os.makedirs(temp_dir, exist_ok=True)
+                image_path = os.path.join(temp_dir, f"image-{i}-{j}-rank-{dist.get_rank()}.jpg")
                 pil.save(image_path)
                 images_list.append(image_path)
 
@@ -693,7 +693,7 @@ def main(_):
         if epoch != 0 and epoch % config.save_freq == 0 or (epoch == len(loader) - 1): # 
         #if epoch % config.save_freq == 0: 
             if accelerator.is_main_process:
-                base_checkpoint_dir = f"/mnt/tidalfs-bdsz01/dataset/llm_dataset/shijian/t2i_scaling/checkpoints/ablation/reward_model/sd/{config.run_name}"
+                base_checkpoint_dir = os.path.join(config.checkpoint_dir, config.run_name)
                 # Create a unique directory for this specific checkpoint
                 checkpoint_epoch_dir = os.path.join(base_checkpoint_dir, f"checkpoint_epoch_{epoch}")
                 os.makedirs(checkpoint_epoch_dir, exist_ok=True)

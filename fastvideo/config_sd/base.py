@@ -6,7 +6,7 @@ def get_config():
 
     ###### General ######
     # run name for wandb logging and checkpoint saving -- if not provided, will be auto-generated based on the datetime.
-    config.run_name = "ours_sd1.5_balance_instructblip_flant5_xxl"
+    config.run_name = "sd1.5_timestep"
     # random seed for reproducibility.
     config.seed = 42
     # top-level logging directory for checkpoint saving.
@@ -38,6 +38,15 @@ def get_config():
     pretrained.model = "./data/stable-diffusion-v1-5"
     # revision of the model to load.
     pretrained.revision = "main"
+
+    ###### Reward Model ######
+    config.reward_model_name = "llava-v1.5-7b"
+
+    ###### Checkpoint ######
+    config.checkpoint_dir = "./checkpoints"
+
+    ###### Intermediate Image Storage ######
+    config.temp_image_dir = "./temp_images"
 
     ###### Sampling ######
     config.sample = sample = ml_collections.ConfigDict()
@@ -88,6 +97,17 @@ def get_config():
     # the fraction of timesteps to train on. if set to less than 1.0, the model will be trained on a subset of the
     # timesteps for each sample. this will speed up training but reduce the accuracy of policy gradient estimates.
     train.timestep_fraction = 1.0
+
+    ###### Curriculum Sampler ######
+    config.curriculum = curriculum = ml_collections.ConfigDict()
+    # sampling strategy: "timestep", "balance", "cosine", "gaussian"
+    curriculum.strategy = "balance"
+    # total steps for cosine/gaussian schedule progression
+    curriculum.total_steps = 1000
+    # Gaussian width parameter (larger = wider difficulty spread)
+    curriculum.alpha = 1.0
+    # Gaussian progression speed (larger = faster progression to hard samples)
+    curriculum.beta = 1.0
 
     ###### Prompt Function ######
     # prompt function to use. see `prompts.py` for available prompt functions.

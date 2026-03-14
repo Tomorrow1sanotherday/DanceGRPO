@@ -1,72 +1,179 @@
-## DanceGRPO
-**DanceGRPO is the first unified RL-based framework for visual generation.**
+## DanceGRPO SD GRPO 训练说明（简版）
 
-This is the official implementation for [paper](https://arxiv.org/abs/2505.07818), DanceGRPO: Unleashing GRPO on Visual Generation.
-We develop [DanceGRPO](https://arxiv.org/abs/2505.07818) based on FastVideo, a scalable and efficient framework for video and image generation.
+**本仓库当前主要使用 `finetune_sd_grpo.sh` 进行 Stable Diffusion 的 GRPO 训练。下面是从环境搭建到启动训练的完整流程，按顺序执行即可。**
 
-## Key Features
+---
 
-DanceGRPO has the following features:
-- Support Stable Diffusion
-- Support FLUX
-- Support HunyuanVideo (todo)
+## 1. 环境准备
 
+- **Python**: 3.10  
+- **虚拟环境工具**: `uv`（建议已全局安装）  
+- **GPU**: 需支持对应 CUDA 版本（默认使用 `torch==2.5.0` + `cu121` 源）  
 
-## Getting Started
-### Downloading checkpoints
-You should use ```"mkdir"``` for these folders first.
-1. Download the Stable Diffusion v1.4 checkpoints from [here](https://huggingface.co/CompVis/stable-diffusion-v1-4) to ```"./data/stable-diffusion-v1-4"```.
-2. Download the FLUX checkpoints from [here](https://huggingface.co/black-forest-labs/FLUX.1-dev) to ```"./data/flux"```.
-3. Download the HPS-v2.1 checkpoint (HPS_v2.1_compressed.pt) from [here](https://huggingface.co/xswu/HPSv2/tree/main) to ```"./hps_ckpt"```.
-4. Download the CLIP H-14 checkpoint (open_clip_pytorch_model.bin) from [here](https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K/tree/main) to ```"./hps_ckpt"```.
+### 1.1 创建并激活 uv 环境
 
-### Installation
+这里以创建名为 `dancegrpo` 的虚拟环境为例（命令按你实际习惯来，关键是：环境名 `dancegrpo`，Python 版本 3.10）：
+
 ```bash
-./env_setup.sh fastvideo
+# 示例（按需替换为你自己的命令）
+uv venv --python 3.10 dancegrpo
+
+# 激活环境
+source dancegrpo/bin/activate
 ```
-### Training
+
+确保此时：
+
+- `python --version` 为 3.10.x  
+- 已经处在名为 `dancegrpo` 的环境中  
+
+---
+
+## 2. 安装依赖（env_setup_uv.sh）
+
+激活 `dancegrpo` 环境后，在项目根目录 `DanceGRPO` 下执行安装脚本。
+
+### 2.1 切换到项目根目录
+
 ```bash
-# for Stable Diffusion, with 8 H800s
-bash scripts/finetune/finetune_sd_grpo.sh   
+cd DanceGRPO
 ```
+
+### 2.2 执行环境安装脚本
+
 ```bash
-# for FLUX, preprocessing with 8 H800s
-bash scripts/preprocess/preprocess_flux_rl_embeddings.sh
-# for FLUX, training with 16 H800s
-bash scripts/finetune/finetune_flux_grpo.sh   
+bash env_setup_uv.sh
 ```
 
-For open-source version, we use the prompts in [HPD](https://huggingface.co/datasets/ymhao/HPDv2/tree/main) dataset for training, as shown in ```"./prompts.txt"```.
+`env_setup_uv.sh` 中主要做了以下几件事（使用 `uv pip`）：
 
-### Rewards
-We give the (moving average) reward curves (also the results in `reward.txt` or `hps_reward.txt`) of Stable Diffusion (left or upper) and FLUX (right or lower). We can complete the FLUX training (200 iterations) within 12 hours with 16 H800s.
+- 安装基础依赖：`psutil`、`setuptools`、`packaging`、`ninja` 等  
+- 安装 PyTorch：`torch==2.5.0`、`torchvision`（`cu121` 源）  
+- 安装 `flash-attn` 及其额外 wheel  
+- 安装 `requirements-lint.txt` 里的检查/开发依赖  
+- 以可编辑模式安装本仓库：`uv pip install -e .`  
+- 安装额外依赖：`ml-collections`、`absl-py`、`inflect==6.0.4`、`pydantic==1.10.9`、`huggingface_hub==0.24.0`、`protobuf==3.20.0`、`accelerate` 等  
+- 安装评测与外部项目：`t2v-metrics`、`LLaVA-NeXT`、`openai/CLIP`、自定义 `pytorchvideo`  
 
-<img src=assets/rewards/opensource_sd.png width="49%">
-<img src=assets/rewards/opensource_flux.png width="49%">
+脚本注释中还提示：
 
-We provide more visualization examples (base, 80 iters rlhf, 160 iters rlhf) in ```"./assets/flux_visualization"```. We always use larger resolutions and more sampling steps than RLHF training for visualization, because we use lower resolutions and less sampling steps for speeding up the RLHF training.
-
-Here is the visualization script `"./scripts/visualization/vis_flux.py"` for FLUX. First, run `rm -rf ./data/flux/transformer/*` to clear the directory, then copy the files from a trained checkpoint (e.g., `checkpoint-160-0`) into `./data/flux/transformer`. After that, you can run the visualization. If it's trained for 160 iterations, the results are already provided in my repo.  
-
-We don't recommend using 8 H800s for the FLUX training script, because we find a global prompt batch size of 8 is not enough.
-
-More discussion on FLUX can be found in ```"./fastvideo/README.md"```.
-
-## Acknowledgement
-We learned and reused code from the following projects:
-- [FastVideo](https://github.com/hao-ai-lab/FastVideo)
-- [diffusers](https://github.com/huggingface/diffusers)
-- [DDPO-Pytorch](https://github.com/kvablack/ddpo-pytorch)
-
-
-## Citation
-If you use DanceGRPO for your research, please cite our paper:
-
-```bibtex
-@article{xue2025dancegrpo,
-  title={DanceGRPO: Unleashing GRPO on Visual Generation},
-  author={Xue, Zeyue and Wu, Jie and Gao, Yu and Kong, Fangyuan and Zhu, Lingting and Chen, Mengzhao and Liu, Zhiheng and Liu, Wei and Guo, Qiushan and Huang, Weilin and others},
-  journal={arXiv preprint arXiv:2505.07818},
-  year={2025}
-}
+```bash
+# 先手动安装：uv pip install setuptools
+# sudo apt install ffmpeg
 ```
+
+如有需要，先手动安装：
+
+```bash
+uv pip install setuptools
+sudo apt install ffmpeg
+```
+
+---
+
+## 3. 数据与模型准备
+
+`scripts/finetune/finetune_sd_grpo.sh` 中相关默认路径为：
+
+- `SD_MODEL_PATH="./data/stable-diffusion-v1-5"`  
+- `REWARD_MODEL_NAME="llava-v1.6-13b"`  
+- `TEMP_IMAGE_DIR="./temp_images"`  
+- `CHECKPOINT_DIR="./checkpoints"`  
+
+你需要根据这些变量准备好：
+
+- 将 Stable Diffusion v1.5 模型权重放在 `./data/stable-diffusion-v1-5`  
+- 确保能加载名为 `llava-v1.6-13b` 的奖励模型（例如从 Hugging Face 或本地路径）  
+- 创建临时图片目录和 checkpoint 目录：
+
+```bash
+mkdir -p data/stable-diffusion-v1-5
+mkdir -p temp_images
+mkdir -p checkpoints
+```
+
+---
+
+## 4. 训练脚本（finetune_sd_grpo.sh）
+
+主要逻辑位于 `scripts/finetune/finetune_sd_grpo.sh`，核心包括：
+
+- 设置 W&B 环境变量（`WANDB_DISABLED=true` 等）  
+- 设置 SD 模型路径、奖励模型名称、临时图片目录、checkpoint 保存目录  
+- 设置 curriculum 采样策略：
+  - `CURRICULUM_STRATEGY="timestep"`（可选 `"balance"`, `"cosine"`, `"gaussian"` 等）
+  - `CURRICULUM_TOTAL_STEPS`、`CURRICULUM_ALPHA`、`CURRICULUM_BETA` 控制曲线形状  
+- 使用 `torchrun` 启动多卡训练：
+
+```bash
+torchrun --nproc_per_node=8 --master_port 19001 \
+  fastvideo/train_grpo_sd_curr.py \
+  --config fastvideo/config_sd/dgx.py:hps \
+  --config.pretrained.model="${SD_MODEL_PATH}" \
+  --config.reward_model_name="${REWARD_MODEL_NAME}" \
+  --config.temp_image_dir="${TEMP_IMAGE_DIR}" \
+  --config.checkpoint_dir="${CHECKPOINT_DIR}" \
+  --config.save_freq="${SAVE_FREQ}" \
+  --config.curriculum.strategy="${CURRICULUM_STRATEGY}" \
+  --config.curriculum.total_steps="${CURRICULUM_TOTAL_STEPS}" \
+  --config.curriculum.alpha="${CURRICULUM_ALPHA}" \
+  --config.curriculum.beta="${CURRICULUM_BETA}"
+```
+
+- `--nproc_per_node=8` 表示使用 8 卡，如果你机器 GPU 数量不同，可以改成对应的卡数。  
+
+---
+
+## 5. 启动训练（一步到位）
+
+假设你已经：
+
+- 安装好 `uv`，并创建+激活了 `dancegrpo`（Python 3.10）环境  
+- 在 `/root/autodl-tmp/DanceGRPO` 下跑完了 `bash env_setup_uv.sh`  
+- 准备好了 SD 模型和奖励模型，对应目录已经就绪  
+
+那么只需要：
+
+```bash
+cd /root/autodl-tmp/DanceGRPO
+bash scripts/finetune/finetune_sd_grpo.sh
+```
+
+如果你把脚本拷到根目录并命名为 `finetune_sd_grpo.sh`，也可以：
+
+```bash
+cd /root/autodl-tmp/DanceGRPO
+bash finetune_sd_grpo.sh
+```
+
+训练过程中：
+
+- checkpoint 会保存到 `./checkpoints`  
+- 临时图片写到 `./temp_images`  
+- 如配置了 W&B，可在网页端查看日志和曲线  
+
+---
+
+## 6. 常用可调参数
+
+你可以直接在 `scripts/finetune/finetune_sd_grpo.sh` 中改以下变量：
+
+- **基础模型路径**：`SD_MODEL_PATH`  
+- **奖励模型名称**：`REWARD_MODEL_NAME`  
+- **Checkpoint 保存间隔**：`SAVE_FREQ`  
+- **Curriculum 策略与参数**：`CURRICULUM_STRATEGY`、`CURRICULUM_TOTAL_STEPS`、`CURRICULUM_ALPHA`、`CURRICULUM_BETA`  
+- **GPU 数量**：`torchrun --nproc_per_node=...`  
+
+改完重新 `bash` 该脚本即可生效。
+
+---
+
+## 7. 快速总结
+
+1. 安装并使用 `uv` 创建 **Python 3.10** 环境 `dancegrpo`，激活；  
+2. `cd /root/autodl-tmp/DanceGRPO`；  
+3. 运行 `bash env_setup_uv.sh` 安装依赖；  
+4. 准备好 `./data/stable-diffusion-v1-5` 模型权重等资源；  
+5. 运行训练：`bash scripts/finetune/finetune_sd_grpo.sh`（或你自己放在根目录的 `bash finetune_sd_grpo.sh`）。  
+
+按以上顺序执行，即可完成环境搭建并启动 DanceGRPO 的 Stable Diffusion GRPO 训练。
