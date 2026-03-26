@@ -1,5 +1,4 @@
 #!/bin/bash
-#先手动安装：uv pip install setuptools
 #sudo apt install ffmpeg
 
 # install torch
